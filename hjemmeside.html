@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Golfklubb – Hjemmeside</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-dark:  #2d5a1b;
+      --green-mid:   #3d7a28;
+      --green-light: #5a9e3a;
+      --green-btn:   #4a8a2a;
+      --cream:       #f4f1e8;
+      --sand:        #e8e2d0;
+      --dark:        #1a1a1a;
+      --gray:        #555;
+      --light-gray:  #f0ede6;
+      --white:       #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Open Sans', sans-serif; color: var(--dark); background: var(--white); overflow-x: hidden; }
+
+    /* TOP BAR */
+    .top-bar { background: #111; padding: 0.4rem 2rem; display: flex; justify-content: flex-end; align-items: center; gap: 0.8rem; }
+    .social-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; text-decoration: none; }
+    .si-fb { background: #1877f2; color: #fff; }
+    .si-ig { background: #e1306c; color: #fff; }
+    .si-yr { background: #003087; color: #fff; }
+
+    /* NAV */
+    nav { background: var(--white); border-bottom: 3px solid var(--green-mid); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+    .nav-inner { max-width: 1300px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; }
+    .nav-logo { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.2rem 0.6rem 0; border-right: 1px solid #e0e0e0; margin-right: 0.5rem; text-decoration: none; }
+    .logo-circle { width: 52px; height: 52px; background: var(--green-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Montserrat', sans-serif; font-size: 0.5rem; font-weight: 700; letter-spacing: 0.05em; text-align: center; line-height: 1.3; flex-shrink: 0; }
+    .nav-links { display: flex; list-style: none; flex: 1; }
+    .nav-links > li > a { display: block; padding: 1.1rem 0.75rem; font-family: 'Montserrat', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--dark); text-decoration: none; transition: color 0.2s, background 0.2s; white-space: nowrap; }
+    .nav-links > li > a:hover { color: var(--green-mid); background: var(--light-gray); }
+    .nav-actions { display: flex; align-items: center; margin-left: auto; border-left: 1px solid #e0e0e0; }
+    .nav-action-btn { display: flex; flex-direction: column; align-items: center; padding: 0.6rem 0.9rem; text-decoration: none; color: var(--dark); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-right: 1px solid #e0e0e0; transition: background 0.2s, color 0.2s; cursor: pointer; background: none; border-top: none; border-bottom: none; font-family: 'Montserrat', sans-serif; }
+    .nav-action-btn:hover { background: var(--light-gray); color: var(--green-dark); }
+    .nav-action-btn .icon { font-size: 1rem; margin-bottom: 0.15rem; }
+
+    /* STATUS PANEL */
+    .status-panel { position: fixed; top: 0; right: 0; width: 300px; background: var(--white); box-shadow: -4px 0 30px rgba(0,0,0,0.2); z-index: 500; transform: translateX(100%); transition: transform 0.35s ease; padding: 2rem; height: 100vh; overflow-y: auto; }
+    .status-panel.open { transform: translateX(0); }
+    .status-panel h3 { font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-dark); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--green-mid); }
+    .status-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee; font-size: 0.83rem; }
+    .status-badge { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 2px; }
+    .open-b { background: #e8f5e9; color: #2e7d32; }
+    .closed-b { background: #ffebee; color: #c62828; }
+    .panel-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #999; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 400; display: none; }
+    .overlay.show { display: block; }
+
+    /* HERO */
+    .hero { position: relative; height: 540px; overflow: hidden; }
+    .hero-bg { width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%), radial-gradient(ellipse at 40% 60%, #4a8a2a 0%, #2d5a1b 50%, #1a3510 100%); }
+    .hero-deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .hd { position: absolute; border-radius: 50%; background: #6db33f; opacity: 0.1; }
+    .hd1 { width: 700px; height: 350px; top: -80px; left: -150px; }
+    .hd2 { width: 500px; height: 250px; top: 150px; right: -100px; }
+    .hd3 { width: 350px; height: 180px; bottom: 40px; left: 350px; }
+    .hero-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+    .hero-title { font-family: 'Montserrat', sans-serif; font-size: clamp(1.8rem, 4.5vw, 3.5rem); font-weight: 800; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5); margin-bottom: 1rem; }
+    .hero-sub { font-size: 1.05rem; color: rgba(255,255,255,0.88); margin-bottom: 2.5rem; text-shadow: 0 1px 8px rgba(0,0,0,0.4); }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .hero-btn { display: inline-block; padding: 0.85rem 2rem; border-radius: 30px; font-family: 'Montserrat', sans-serif; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.05em; text-decoration: none; transition: all 0.2s; }
+    .hb-primary { background: var(--green-btn); color: #fff; border: 2px solid var(--green-btn); }
+    .hb-primary:hover { background: var(--green-dark); border-color: var(--green-dark); transform: translateY(-2px); }
+    .hb-secondary { background: rgba(255,255,255,0.15); color: #fff; border: 2px solid rgba(255,255,255,0.65); backdrop-filter: blur(4px); }
+    .hb-secondary:hover { background: rgba(255,255,255,0.28); transform: translateY(-2px); }
+
+    /* QUICK LINKS */
+    .quick-links { background: var(--sand); border-top: 1px solid #d5cebc; }
+    .ql-inner { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+    .ql-item { display: flex; align-items: center; gap: 1rem; padding: 1.8rem 1.8rem; border-right: 1px solid #d5cebc; text-decoration: none; color: var(--dark); transition: background 0.2s; }
+    .ql-item:last-child { border-right: none; }
+    .ql-item:hover { background: #ddd6c2; }
+    .ql-icon { width: 44px; height: 44px; background: var(--green-dark); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.2rem; flex-shrink: 0; }
+    .ql-item h3 { font-family: 'Montserrat', sans-serif; font-size: 0.88rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.15rem; }
+    .ql-item p { font-size: 0.77rem; color: var(--gray); }
+
+    /* NEWS */
+    .news-strip { background: var(--green-dark); padding: 0.75rem 0; }
+    .news-inner { max-width: 1300px; margin: 0 auto; padding: 0 2rem; display: flex; align-items: center; gap: 1.2rem; }
+    .news-tag { background: var(--green-light); color: #fff; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.25rem 0.7rem; border-radius: 2px; white-space: nowrap; }
+    .news-text { color: rgba(255,255,255,0.82); font-size: 0.83rem; flex: 1; }
+    .news-link { color: #a8d78a; font-size: 0.78rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .news-link:hover { color: #fff; }
+
+    /* CONTENT */
+    .container { max-width: 1300px; margin: 0 auto; padding: 0 2rem; }
+    .section { padding: 5rem 0; }
+    .section.alt { background: var(--light-gray); }
+    .section-label { display: inline-block; background: var(--green-dark); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.28rem 0.7rem; margin-bottom: 0.8rem; }
+    .section-title { font-family: 'Montserrat', sans-serif; font-size: clamp(1.4rem, 2.8vw, 2rem); font-weight: 800; color: var(--green-dark); margin-bottom: 0.8rem; line-height: 1.25; }
+    .section-desc { font-size: 0.92rem; color: var(--gray); line-height: 1.8; max-width: 500px; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center; }
+    .two-col.rev { direction: rtl; }
+    .two-col.rev > * { direction: ltr; }
+    .visual-block { position: relative; height: 360px; border-radius: 4px; overflow: hidden; }
+    .visual-green { width: 100%; height: 100%; background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 50%, var(--green-light) 100%); display: flex; align-items: center; justify-content: center; font-size: 5rem; opacity: 0.9; }
+    .visual-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.55)); padding: 1.3rem; color: #fff; }
+    .v-num { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; font-weight: 800; }
+    .v-lbl { font-size: 0.75rem; opacity: 0.8; letter-spacing: 0.1em; text-transform: uppercase; }
+    .info-list { list-style: none; margin: 1.3rem 0 1.8rem; }
+    .info-list li { padding: 0.45rem 0; border-bottom: 1px solid #e0e0e0; font-size: 0.87rem; display: flex; align-items: center; gap: 0.6rem; color: var(--gray); }
+    .info-list li::before { content: '⛳'; font-size: 0.75rem; }
+    .btn-green { display: inline-block; background: var(--green-btn); color: #fff; padding: 0.75rem 1.6rem; border-radius: 3px; font-family: 'Montserrat', sans-serif; font-size: 0.77rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; transition: background 0.2s, transform 0.2s; margin-right: 0.7rem; margin-top: 0.5rem; }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-outline { display: inline-block; border: 2px solid var(--green-dark); color: var(--green-dark); padding: 0.7rem 1.4rem; border-radius: 3px; font-family: 'Montserrat', sans-serif; font-size: 0.77rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; transition: all 0.2s; margin-top: 0.5rem; }
+    .btn-outline:hover { background: var(--green-dark); color: #fff; }
+
+    /* CARDS */
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.3rem; margin-top: 2.5rem; }
+    .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+    .card-img { height: 150px; background: linear-gradient(135deg, var(--green-mid), var(--green-light)); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; color: rgba(255,255,255,0.5); }
+    .card-body { padding: 1.1rem; }
+    .card-body h4 { font-family: 'Montserrat', sans-serif; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green-dark); margin-bottom: 0.35rem; }
+    .card-body p { font-size: 0.8rem; color: var(--gray); line-height: 1.6; }
+    .card-link { display: inline-block; margin-top: 0.7rem; color: var(--green-mid); font-size: 0.78rem; font-weight: 600; text-decoration: none; }
+    .card-link:hover { color: var(--green-dark); }
+
+    /* CTA BANNER */
+    .cta-banner { background: var(--green-dark); padding: 4rem 0; text-align: center; }
+    .cta-banner h2 { font-family: 'Montserrat', sans-serif; font-size: clamp(1.4rem, 2.8vw, 2.2rem); font-weight: 800; color: #fff; margin-bottom: 0.7rem; }
+    .cta-banner p { color: rgba(255,255,255,0.7); margin-bottom: 2rem; font-size: 0.95rem; }
+    .btn-white { display: inline-block; background: #fff; color: var(--green-dark); padding: 0.85rem 2rem; border-radius: 3px; font-family: 'Montserrat', sans-serif; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; margin: 0 0.4rem; transition: all 0.2s; }
+    .btn-white:hover { background: var(--cream); transform: translateY(-2px); }
+    .btn-white-out { display: inline-block; border: 2px solid rgba(255,255,255,0.55); color: #fff; padding: 0.8rem 1.8rem; border-radius: 3px; font-family: 'Montserrat', sans-serif; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; margin: 0 0.4rem; transition: all 0.2s; }
+    .btn-white-out:hover { background: rgba(255,255,255,0.1); border-color: #fff; transform: translateY(-2px); }
+
+    /* FOOTER */
+    footer { background: #111; color: rgba(255,255,255,0.55); padding: 3rem 0 1.5rem; }
+    .footer-inner { max-width: 1300px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; }
+    .footer-logo-text { font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.7rem; }
+    .footer-addr { font-size: 0.8rem; line-height: 1.8; }
+    footer h4 { font-family: 'Montserrat', sans-serif; font-size: 0.67rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-light); margin-bottom: 0.9rem; }
+    footer ul { list-style: none; }
+    footer ul li { margin-bottom: 0.45rem; }
+    footer ul li a { color: rgba(255,255,255,0.48); text-decoration: none; font-size: 0.8rem; transition: color 0.2s; }
+    footer ul li a:hover { color: #fff; }
+    .footer-bottom { max-width: 1300px; margin: 2rem auto 0; padding: 1.2rem 2rem 0; border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.73rem; text-align: center; }
+
+    @media (max-width: 1024px) {
+      .nav-links > li > a { padding: 1.1rem 0.55rem; font-size: 0.62rem; }
+      .ql-inner { grid-template-columns: repeat(2, 1fr); }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .two-col, .two-col.rev { grid-template-columns: 1fr; direction: ltr; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .ql-inner { grid-template-columns: 1fr 1fr; }
+      .footer-inner { grid-template-columns: 1fr; }
+      .hero { height: 400px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="#" class="social-icon si-fb">f</a>
+  <a href="#" class="social-icon si-ig">ig</a>
+  <a href="#" class="social-icon si-yr">yr</a>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeStatus()"></div>
+<div class="status-panel" id="statusPanel">
+  <button class="panel-close" onclick="closeStatus()">✕</button>
+  <h3>STATUS – GOLFKLUBB</h3>
+  <div class="status-row"><span>Banen</span><span class="status-badge open-b">ÅPEN</span></div>
+  <div class="status-row"><span>Driving Range</span><span class="status-badge open-b">ÅPEN</span></div>
+  <div class="status-row"><span>Treningsområde</span><span class="status-badge open-b">ÅPEN</span></div>
+  <div class="status-row"><span>Proshop</span><span class="status-badge open-b">ÅPEN</span></div>
+  <div class="status-row"><span>Golfbiler</span><span class="status-badge closed-b">STENGT</span></div>
+  <div class="status-row"><span>Restaurant</span><span class="status-badge open-b">ÅPEN</span></div>
+  <br/>
+  <h3>Vær i dag</h3>
+  <div class="status-row"><span>🌤 Delvis skyet</span><span>12 °C</span></div>
+  <div class="status-row"><span>💨 Vind</span><span>4 m/s</span></div>
+  <div class="status-row"><span>🌧 Nedbør</span><span>0 mm</span></div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-circle">⛳<br/>GOLF<br/>KLUBB</div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">Klubben</a></li>
+      <li><a href="#">Banen</a></li>
+      <li><a href="#">Proshop</a></li>
+      <li><a href="#">Gjester</a></li>
+      <li><a href="#">Medlemskap</a></li>
+      <li><a href="#">Kurs/instruksjon</a></li>
+      <li><a href="#">Kafé</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-action-btn" onclick="toggleStatus()">
+        <span class="icon">🕐</span>STATUS
+      </button>
+      <a href="#" class="nav-action-btn"><span class="icon">🏌️</span>GOLFBOX</a>
+      <a href="#" class="nav-action-btn"><span class="icon">📞</span>KONTAKT</a>
+      <a href="#" class="nav-action-btn"><span class="icon">🔍</span>SØK</a>
+    </div>
+  </div>
+</nav>
+
+<div class="news-strip">
+  <div class="news-inner">
+    <span class="news-tag">Nyhet</span>
+    <span class="news-text">Sesongen 2025 er i gang – banen er nå åpen! Booking tilgjengelig via Golfbox.</span>
+    <a href="#" class="news-link">Les mer →</a>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-deco">
+    <div class="hd hd1"></div>
+    <div class="hd hd2"></div>
+    <div class="hd hd3"></div>
+  </div>
+  <div class="hero-content">
+    <h1 class="hero-title">Velkommen til Golfklubb</h1>
+    <p class="hero-sub">Vi har noen få medlemskap ledig! Meld deg inn nå:</p>
+    <div class="hero-btns">
+      <a href="#" class="hero-btn hb-primary">Innmelding / Venteliste</a>
+      <a href="booking.html" class="hero-btn hb-secondary">Book instruksjon</a>
+    </div>
+  </div>
+</section>
+
+<div class="quick-links">
+  <div class="ql-inner">
+    <a href="#" class="ql-item">
+      <div class="ql-icon">🏌️</div>
+      <div><h3>Banen</h3><p>Se baneguide, slope og scorekort</p></div>
+    </a>
+    <a href="booking.html" class="ql-item">
+      <div class="ql-icon">📅</div>
+      <div><h3>Gjester</h3><p>Greenfee og booking</p></div>
+    </a>
+    <a href="#" class="ql-item">
+      <div class="ql-icon">🏆</div>
+      <div><h3>Medlemskap</h3><p>Kategorier og priser</p></div>
+    </a>
+    <a href="#" class="ql-item">
+      <div class="ql-icon">📚</div>
+      <div><h3>Kurs</h3><p>Instruksjon og treningsgrupper</p></div>
+    </a>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="two-col">
+      <div>
+        <span class="section-label">Om klubben</span>
+        <h2 class="section-title">En bane for alle nivåer</h2>
+        <p class="section-desc">Vår golfklubb er et naturskjønt anlegg med en 18-hulls bane som utfordrer både nybegynnere og erfarne spillere. Vi tilbyr treningsanlegg, pro-shop og hyggelig kafé.</p>
+        <ul class="info-list">
+          <li>18-hulls mesterskapsdesignet bane</li>
+          <li>Driving range med overdekket bunn</li>
+          <li>Puttinggreen og chippinggreen</li>
+          <li>PGA-sertifiserte instruksjonsprofesjonelle</li>
+        </ul>
+        <a href="#" class="btn-green">Om klubben</a>
+        <a href="#" class="btn-outline">Se bilder</a>
+      </div>
+      <div class="visual-block">
+        <div class="visual-green">⛳</div>
+        <div class="visual-overlay">
+          <div class="v-num">18</div>
+          <div class="v-lbl">Hull · Par 72</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="container">
+    <div class="two-col rev">
+      <div class="visual-block">
+        <div class="visual-green" style="background: linear-gradient(135deg,#1a3510,#3d7a28,#5a9e3a);">🏌️‍♂️</div>
+        <div class="visual-overlay">
+          <div class="v-num">500+</div>
+          <div class="v-lbl">Medlemmer</div>
+        </div>
+      </div>
+      <div>
+        <span class="section-label">Kurs og instruksjon</span>
+        <h2 class="section-title">Lær golf med våre proffene</h2>
+        <p class="section-desc">Enten du er helt nybegynner eller ønsker å forbedre handicapet, tilbyr vi kurs og privatleksjoner tilpasset alle nivåer.</p>
+        <ul class="info-list">
+          <li>Veien til golf – voksen og barn</li>
+          <li>Privatleksjoner med PGA-pro</li>
+          <li>Herretrening, dametrening og seniortrening</li>
+          <li>Videoanalyse og teknisk gjennomgang</li>
+        </ul>
+        <a href="booking.html" class="btn-green">Book instruksjon</a>
+        <a href="#" class="btn-outline">Se kurskalender</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-label">Utforsk</span>
+    <h2 class="section-title">Alt du trenger på ett sted</h2>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-img">🏅</div>
+        <div class="card-body">
+          <h4>Turneringer</h4>
+          <p>Oversikt over turneringsprogrammet for sesongen. Meld deg på og konkurrer mot andre.</p>
+          <a href="#" class="card-link">Se turneringer →</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img">🛍️</div>
+        <div class="card-body">
+          <h4>Proshop</h4>
+          <p>Utstyr, klær og tilbehør fra de beste merkene. Vi hjelper deg med riktig utstyr.</p>
+          <a href="#" class="card-link">Besøk proshop →</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img">☕</div>
+        <div class="card-body">
+          <h4>Kafé</h4>
+          <p>Nyt en god lunsj eller middag med utsikt over banen i hyggelige omgivelser.</p>
+          <a href="#" class="card-link">Se meny →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-banner">
+  <div class="container">
+    <h2>Klar for å booke en runde?</h2>
+    <p>Greenfee og tider tilgjengelig for gjester. Enkel og rask booking.</p>
+    <a href="booking.html" class="btn-white">Book greenfee</a>
+    <a href="#" class="btn-white-out">Bli medlem</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo-text">⛳ Golfklubb</div>
+      <p class="footer-addr">Baneveien 1<br/>0000 Sted<br/><br/>Administrasjon: <a href="tel:00000000" style="color:#aaa;text-decoration:none;">00 00 00 00</a></p>
+    </div>
+    <div>
+      <h4>Klubben</h4>
+      <ul><li><a href="#">Om klubben</a></li><li><a href="#">Ansatte</a></li><li><a href="#">Styret</a></li><li><a href="#">Nyheter</a></li></ul>
+    </div>
+    <div>
+      <h4>Tilbud</h4>
+      <ul><li><a href="#">Banen</a></li><li><a href="#">Gjester</a></li><li><a href="#">Kurs</a></li><li><a href="#">Turneringer</a></li></ul>
+    </div>
+    <div>
+      <h4>Info</h4>
+      <ul><li><a href="#">Medlemskap</a></li><li><a href="#">Proshop</a></li><li><a href="#">Kafé</a></li><li><a href="booking.html">Book tid</a></li></ul>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2025 Golfklubb. Alle rettigheter forbeholdt.</div>
+</footer>
+
+<script>
+  function toggleStatus() {
+    document.getElementById('statusPanel').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+  function closeStatus() {
+    document.getElementById('statusPanel').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+</script>
+</body>
+</html>
