@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Book tid – Min Golfklubb</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root { --green-dark:#1e3a1e; --green-mid:#2d5a27; --green-light:#4a8c3f; --green-bright:#5aad4e; --gold:#c8a84b; --cream:#f4f1e8; --light-bg:#edeae0; --white:#ffffff; --dark:#111111; --gray:#555555; --gray-light:#888888; }
@@ -29,10 +30,12 @@
     .page-header h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; }
     .page-header p { margin-top: 0.4rem; opacity: 0.7; font-size: 0.95rem; }
     .booking-wrapper { max-width: 1100px; margin: 3rem auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start; }
-    .booking-tabs { display: flex; border-bottom: 2px solid rgba(0,0,0,0.1); margin-bottom: 2rem; }
-    .tab { padding: 0.9rem 1.5rem; font-family: 'Montserrat', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; color: var(--gray); transition: color 0.2s, border-color 0.2s; user-select: none; }
+    .booking-tabs { display: flex; border-bottom: 2px solid rgba(0,0,0,0.1); margin-bottom: 2rem; overflow-x: auto; }
+    .tab { padding: 0.9rem 1.5rem; font-family: 'Montserrat', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; color: var(--gray); transition: color 0.2s, border-color 0.2s; user-select: none; white-space: nowrap; }
     .tab.active { color: var(--green-mid); border-bottom-color: var(--green-mid); }
     .form-card { background: var(--white); border-radius: 6px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); overflow: hidden; }
+    .map-container { width: 100%; height: 500px; border-radius: 6px; overflow: hidden; }
+    #map { width: 100%; height: 100%; }
     .form-card-header { background: var(--green-mid); color: var(--white); padding: 1.2rem 1.8rem; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; }
     .form-body { padding: 2rem 1.8rem; }
     .steps-bar { display: flex; margin-bottom: 2rem; }
@@ -109,7 +112,7 @@
     .s-closed { color: #cc3333; }
     .rule-item { padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.82rem; color: var(--gray); display: flex; gap: 0.6rem; }
     .rule-item:last-child { border-bottom: none; }
-    .rule-item::before { content: 'â¢'; color: var(--green-light); flex-shrink: 0; }
+    .rule-item::before { content: '•'; color: var(--green-light); flex-shrink: 0; }
     @media (max-width: 900px) { .booking-wrapper { grid-template-columns: 1fr; } .nav-links { display: none; } .form-row { grid-template-columns: 1fr; } .time-grid { grid-template-columns: repeat(4, 1fr); } }
   </style>
 </head>
@@ -139,6 +142,7 @@
       <div class="tab active" onclick="switchTab(this,'member')">Medlem</div>
       <div class="tab" onclick="switchTab(this,'guest')">Gjest / Greenfee</div>
       <div class="tab" onclick="switchTab(this,'course')">Kurs &amp; instruksjon</div>
+      <div class="tab" onclick="switchTab(this,'map')">Baner på kart</div>
     </div>
     <div class="form-card">
       <div class="form-card-header" id="cardHeader">&#127949; Book starttid &ndash; Medlem</div>
@@ -205,6 +209,11 @@
             <a href="index.html" class="btn-confirm-home">&#8592; Tilbake til forsiden</a>
           </div>
         </div>
+        <div class="form-section" id="step-map">
+          <div class="map-container">
+            <div id="map"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -246,10 +255,15 @@
     </div>
   </div>
 </div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
   var selDate=null,selTime=null,selPlayers=1;
   var takenSlots=['07:30','09:00','11:30','14:00'];
   var fullDays=[24,26];
+  var mapInitialized = false;
+
   function buildCalendar(){
     var g=document.getElementById('calGrid');g.innerHTML='';
     ['Ma','Ti','On','To','Fr','L\u00f8','S\u00f8'].forEach(function(d){var e=document.createElement('div');e.className='cal-cell header';e.textContent=d;g.appendChild(e);});
@@ -268,6 +282,7 @@
       g.appendChild(el);
     }
   }
+
   function selectDate(d,el){
     document.querySelectorAll('.cal-cell').forEach(function(c){c.classList.remove('selected');});
     el.classList.add('selected');
@@ -275,6 +290,7 @@
     document.getElementById('selectedDateLabel').textContent=selDate;
     buildTimes();document.getElementById('timeSection').style.display='block';
   }
+
   function buildTimes(){
     var g=document.getElementById('timeGrid');g.innerHTML='';
     var slots=['07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'];
@@ -285,6 +301,7 @@
       g.appendChild(el);
     });
   }
+
   function goTo(step){
     document.querySelectorAll('.form-section').forEach(function(s){s.classList.remove('active');});
     document.getElementById('step-'+step).classList.add('active');
@@ -295,7 +312,9 @@
       if(i===step){num.classList.add('active');lbl.classList.add('active');}
     }
   }
+
   function selectPlayers(el,n){document.querySelectorAll('.player-opt').forEach(function(o){o.classList.remove('selected');});el.classList.add('selected');selPlayers=n;}
+
   function submitBooking(){
     var fn=document.getElementById('firstName').value||'Ola';
     var ln=document.getElementById('lastName').value||'Nordmann';
@@ -312,12 +331,76 @@
     document.querySelectorAll('.step-num').forEach(function(s){s.classList.add('done');});
     document.getElementById('step-confirm').classList.add('active');
   }
+
+  function initializeMap(){
+    if(mapInitialized) return;
+    mapInitialized = true;
+    
+    var map = L.map('map').setView([65, 13], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    Papa.parse("golf_courses.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        results.data.forEach(function(course) {
+          if(course.Name && course.Latitude && course.Longitude) {
+            var lat = parseFloat(course.Latitude);
+            var lng = parseFloat(course.Longitude);
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+              L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(
+                  '<b>' + (course.Name || 'Golf Course') + '</b><br>' +
+                  (course.Address ? course.Address + '<br>' : '') +
+                  '📧 ' + (course.Email || 'N/A') + '<br>' +
+                  '📞 ' + (course.Phone || 'N/A')
+                );
+            }
+          }
+        });
+      },
+      error: function(error) {
+        console.log('Error loading CSV:', error);
+      }
+    });
+  }
+
   function switchTab(el,type){
     document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
     el.classList.add('active');
-    var titles={member:'&#127949; Book starttid – Medlem',guest:'&#127919; Book greenfee – Gjest',course:'&#127891; Book kurs / instruksjon'};
+    var titles={
+      member:'&#127949; Book starttid – Medlem',
+      guest:'&#127919; Book greenfee – Gjest',
+      course:'&#127891; Book kurs / instruksjon',
+      map:'&#127757; Golfbaner på kart'
+    };
     document.getElementById('cardHeader').innerHTML=titles[type];
+    
+    document.querySelectorAll('.form-section').forEach(function(s){s.classList.remove('active');});
+    document.querySelectorAll('.steps-bar').forEach(function(s){s.style.display='flex';});
+    
+    if(type === 'map'){
+      document.getElementById('step-map').classList.add('active');
+      document.querySelectorAll('.steps-bar').forEach(function(s){s.style.display='none';});
+      setTimeout(function(){
+        if(document.getElementById('map')) {
+          initializeMap();
+        }
+      }, 100);
+    } else if(type === 'member'){
+      document.getElementById('step-1').classList.add('active');
+    } else if(type === 'guest'){
+      document.getElementById('step-1').classList.add('active');
+    } else if(type === 'course'){
+      document.getElementById('step-1').classList.add('active');
+    }
   }
+
   buildCalendar();
 </script>
 </body>
